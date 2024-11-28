@@ -22,6 +22,7 @@ const RegisterPage: React.FC = () => {
 
         const res = await loginAPI("admin@gmail.com", "1234567")
         console.log(">> check res: ", res)
+
         setIsLoading(false)
     };
 
