@@ -2,7 +2,7 @@ import { getUsersAPI } from '@/services/api';
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { Button, Pagination } from 'antd';
+import { Button } from 'antd';
 import { useRef, useState } from 'react';
 
 
@@ -88,8 +88,8 @@ const TableUser = () => {
                 actionRef={actionRef}
                 cardBordered
                 request={async (params, sort, filter) => {
-                    console.log(sort, filter);
-                    const res = await getUsersAPI();
+                    console.log(params, sort, filter);
+                    const res = await getUsersAPI(params?.current ?? 1, params?.pageSize ?? 5);
                     if (res.data) {
                         setMeta(res.data.meta);
                     }
