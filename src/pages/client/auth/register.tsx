@@ -25,7 +25,7 @@ const RegisterPage: React.FC = () => {
             navigate("/login")
         } else {
             message.warning("Email đã tồn tại trong hệ thống!")
-            console.log(">> check res: ", res.message)
+
         }
         setIsLoading(false)
     };

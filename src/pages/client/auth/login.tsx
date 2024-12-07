@@ -35,7 +35,6 @@ const LoginPage = () => {
                 description: res.message && Array.isArray(res.message) ? res.message[0] : res.message,
                 duration: 5
             })
-            console.log(">> check res: ", res.message)
         }
         setIsLoading(false)
     };
