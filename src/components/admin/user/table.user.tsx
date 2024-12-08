@@ -5,85 +5,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import { useRef, useState } from 'react';
-
-
-
-const columns: ProColumns<IUserTable>[] = [
-    {
-        dataIndex: 'index',
-        valueType: 'indexBorder',
-        width: 48,
-    },
-    {
-        title: 'ID',
-        dataIndex: '_id',
-        hideInSearch: true,
-        render(_, entity) {
-            return (
-                <a href='#'>{entity._id}</a>
-            )
-        },
-    },
-    {
-        title: 'Full name',
-        dataIndex: 'fullName',
-    },
-    {
-        title: 'Email',
-        dataIndex: 'email',
-        copyable: true,
-    },
-    {
-        title: 'Created at',
-        dataIndex: 'createdAt',
-        valueType: "date",
-        sorter: true,
-        hideInSearch: true
-
-    },
-    {
-        title: 'Created at',
-        dataIndex: 'createdAtRange',
-        valueType: "dateRange",
-        hideInTable: true
-
-    },
-    {
-        title: "Action",
-        hideInSearch: true,
-        render() {
-            return (
-                < >
-                    <EditOutlined
-                        style={{
-                            marginRight: "15px", color: "orange", cursor: "pointer"
-                        }}
-                    />
-                    <DeleteOutlined
-                        style={{
-                            color: "red", cursor: "pointer"
-                        }}
-                    />
-                </>
-            )
-        },
-    }
-    // {
-    //     title: 'ntdat',
-    //     dataIndex: 'title',
-    //     copyable: true,
-    //     ellipsis: true,
-    //     tooltip: '标题过长会自动收缩',
-    //     formItemProps: {
-    //         rules: [
-    //             {
-    //                 required: true,
-    //                 message: '此项为必填项',
-    //             },
-    //         ],
-    //     },
-    // },
-];
+import DetailUser from './detail.user';
 
 type TSearch = {
     fullName: string;
@@ -100,6 +22,74 @@ const TableUser = () => {
         pages: 0,
         total: 0
     })
+    const [userDetail, setUserDetail] = useState<IUserTable | null>(null);
+    const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false);
+
+    const columns: ProColumns<IUserTable>[] = [
+        {
+            dataIndex: 'index',
+            valueType: 'indexBorder',
+            width: 48,
+        },
+        {
+            title: 'ID',
+            dataIndex: '_id',
+            hideInSearch: true,
+            render(_, entity) {
+                return (
+                    <a href='#' onClick={() => {
+                        setIsOpenDetail(true)
+                        setUserDetail(entity)
+                    }}>{entity._id}</a>
+                )
+            },
+        },
+        {
+            title: 'Full name',
+            dataIndex: 'fullName',
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            copyable: true,
+        },
+        {
+            title: 'Created at',
+            dataIndex: 'createdAt',
+            valueType: "date",
+            sorter: true,
+            hideInSearch: true
+
+        },
+        {
+            title: 'Created at',
+            dataIndex: 'createdAtRange',
+            valueType: "dateRange",
+            hideInTable: true
+
+        },
+        {
+            title: "Action",
+            hideInSearch: true,
+            render() {
+                return (
+                    < >
+                        <EditOutlined
+                            style={{
+                                marginRight: "15px", color: "orange", cursor: "pointer"
+                            }}
+                        />
+                        <DeleteOutlined
+                            style={{
+                                color: "red", cursor: "pointer"
+                            }}
+                        />
+                    </>
+                )
+            },
+        }
+    ];
+
     return (
         <>
             <ProTable<IUserTable, TSearch>
@@ -167,6 +157,12 @@ const TableUser = () => {
                     </Button>
 
                 ]}
+            />
+            <DetailUser
+                isOpenDetail={isOpenDetail}
+                userDetail={userDetail}
+                setIsOpenDetail={setIsOpenDetail}
+                setUserDetail={setUserDetail}
             />
         </>
     );
