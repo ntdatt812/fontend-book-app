@@ -6,6 +6,7 @@ import { ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import { useRef, useState } from 'react';
 import DetailUser from './detail.user';
+import CreateUser from './create.user';
 
 type TSearch = {
     fullName: string;
@@ -24,6 +25,7 @@ const TableUser = () => {
     })
     const [userDetail, setUserDetail] = useState<IUserTable | null>(null);
     const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false);
+    const [openCreateUser, setOpenCreteUser] = useState<boolean>(false);
 
     const columns: ProColumns<IUserTable>[] = [
         {
@@ -90,6 +92,10 @@ const TableUser = () => {
         }
     ];
 
+    const reloadTable = () => {
+        actionRef.current?.reload();
+    }
+
     return (
         <>
             <ProTable<IUserTable, TSearch>
@@ -98,7 +104,6 @@ const TableUser = () => {
                 cardBordered
                 request={async (params, sort, filter) => {
                     console.log(params, sort, filter);
-
                     let query = "";
                     if (params) {
                         query += `current=${params.current}&pageSize=${params.pageSize}`;
@@ -114,6 +119,9 @@ const TableUser = () => {
                             query += `&createdAt>=${createDateRange[0]}&createdAt<=${createDateRange[1]}`
                         }
                     }
+
+                    //default
+                    query += `&sort=-createdAt`;
 
                     if (sort && sort.createdAt) {
                         query += `&sort=${sort.createdAt === "ascend" ? "createdAt" : "-createdAt"}`;
@@ -150,6 +158,7 @@ const TableUser = () => {
                         icon={<PlusOutlined />}
                         onClick={() => {
                             actionRef.current?.reload();
+                            setOpenCreteUser(true)
                         }}
                         type="primary"
                     >
@@ -163,6 +172,11 @@ const TableUser = () => {
                 userDetail={userDetail}
                 setIsOpenDetail={setIsOpenDetail}
                 setUserDetail={setUserDetail}
+            />
+            <CreateUser
+                openCreateUser={openCreateUser}
+                setOpenCreteUser={setOpenCreteUser}
+                reloadTable={reloadTable}
             />
         </>
     );
