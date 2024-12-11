@@ -198,6 +198,7 @@ const TableUser = () => {
             <ModalImport
                 setIsOpenImport={setIsOpenImport}
                 isOpenImport={isOpenImport}
+                reloadTable={reloadTable}
             />
         </>
     );

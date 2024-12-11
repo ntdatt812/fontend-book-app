@@ -4,11 +4,13 @@ import { UploadProps } from "antd";
 import { Buffer } from 'buffer';
 import { useState } from "react";
 import Exceljs from 'exceljs'
+import { bulkCreateUserAPI } from "@/services/api";
 const { Dragger } = Upload
 
 interface IProps {
     setIsOpenImport: (v: boolean) => void;
     isOpenImport: boolean;
+    reloadTable: () => void;
 }
 
 interface IDataImport {
@@ -20,11 +22,11 @@ interface IDataImport {
 
 
 const ModalImport = (props: IProps) => {
-    const { isOpenImport, setIsOpenImport } = props;
-    const { message } = App.useApp();
+    const { isOpenImport, setIsOpenImport, reloadTable } = props;
+    const { message, notification } = App.useApp();
 
     const [dataImport, setDataImport] = useState<IDataImport[]>([]);
-
+    const [loadingImport, setLoadingImport] = useState<boolean>(false)
     const propsUpload: UploadProps = {
         name: 'file',
         multiple: false, //chỉ upload 1 file
@@ -75,7 +77,6 @@ const ModalImport = (props: IProps) => {
                         })
                     });
                     setDataImport(jsonData);
-
                 }
             } else if (status === 'error') {
                 message.error(`${info.file.name} file upload failed.`);
@@ -90,18 +91,41 @@ const ModalImport = (props: IProps) => {
         }
     };
 
+    const handleBulkCreate = async () => {
+        setLoadingImport(true)
+        const dataUsersImport = dataImport.map(user => ({
+            ...user,
+            password: import.meta.env.VITE_USER_PASSWORD,
+
+        }))
+        const res = await bulkCreateUserAPI(dataUsersImport);
+        if (res.data) {
+            notification.info({
+                message: "Thông báo",
+                description: (<span>
+                    <span style={{ color: 'green' }}> Đã thêm thành công {res.data.countSuccess}</span>, <span style={{ color: 'red' }}> thất bại {res.data.countError}</span>!
+                </span >)
+            })
+        }
+        setLoadingImport(false)
+        setIsOpenImport(false);
+        setDataImport([]);
+        reloadTable();
+    }
+
     return (
         <>
             <Modal title="Import file user"
                 open={isOpenImport}
-                onOk={() => setIsOpenImport(false)}
+                onOk={() => handleBulkCreate()}
                 onCancel={() => {
-                    setIsOpenImport(false)
-                    setDataImport([])
+                    setIsOpenImport(false);
+                    setDataImport([]);
                 }}
                 okText="Import data"
                 okButtonProps={{
-                    disabled: dataImport.length > 0 ? false : true
+                    disabled: dataImport.length > 0 ? false : true,
+                    loading: loadingImport
                 }}
                 //không đóng khi nhấn ra ngoài
                 maskClosable={false}
@@ -121,6 +145,7 @@ const ModalImport = (props: IProps) => {
                     <Table
                         title={() => <span>Dữ liệu upload: </span>}
                         dataSource={dataImport}
+                        rowKey={"email"}
                         columns={[
                             { dataIndex: 'fullName', title: 'Tên hiển thị' },
                             { dataIndex: 'email', title: 'Email' },

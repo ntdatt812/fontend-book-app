@@ -62,4 +62,10 @@ declare global {
         createdAt: Date,
         updatedAt: Date,
     }
+
+    interface IBulkCreate {
+        countSuccess: number,
+        countError: number,
+        detail: string,
+    }
 }
