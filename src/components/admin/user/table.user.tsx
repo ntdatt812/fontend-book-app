@@ -8,6 +8,8 @@ import { useRef, useState } from 'react';
 import DetailUser from './detail.user';
 import CreateUser from './create.user';
 import ModalImport from './import.user';
+import { CSVLink } from 'react-csv';
+import UpdateUser from './update.user';
 
 type TSearch = {
     fullName: string;
@@ -29,6 +31,9 @@ const TableUser = () => {
     const [openCreateUser, setOpenCreteUser] = useState<boolean>(false);
 
     const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
+    const [dataExport, setDataExport] = useState<IUserTable[]>([])
+    const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false)
+    const [dataUpdate, setDataUpdate] = useState<IUserTable | null>(null)
 
     const columns: ProColumns<IUserTable>[] = [
         {
@@ -76,12 +81,16 @@ const TableUser = () => {
         {
             title: "Action",
             hideInSearch: true,
-            render() {
+            render(dom, entity) {
                 return (
                     < >
                         <EditOutlined
                             style={{
                                 marginRight: "15px", color: "orange", cursor: "pointer"
+                            }}
+                            onClick={() => {
+                                setIsOpenUpdate(true)
+                                setDataUpdate(entity)
                             }}
                         />
                         <DeleteOutlined
@@ -128,8 +137,10 @@ const TableUser = () => {
                     } else query += `&sort=-createdAt`;
 
                     const res = await getUsersAPI(query);
+
                     if (res.data) {
                         setMeta(res.data.meta);
+                        setDataExport(res.data?.result ?? []);
                     }
                     return {
                         data: res.data?.result,
@@ -158,7 +169,10 @@ const TableUser = () => {
                         type="primary"
                         icon={<ExportOutlined
                         />}>
-                        Export
+                        <CSVLink
+                            data={dataExport}
+                            filename='export-users.csv'
+                        >Export</CSVLink>
                     </Button>,
                     <Button
                         type="primary"
@@ -195,6 +209,13 @@ const TableUser = () => {
             <ModalImport
                 setIsOpenImport={setIsOpenImport}
                 isOpenImport={isOpenImport}
+                reloadTable={reloadTable}
+            />
+            <UpdateUser
+                setIsOpenUpdate={setIsOpenUpdate}
+                isOpenUpdate={isOpenUpdate}
+                setDataUpdate={setDataUpdate}
+                dataUpdate={dataUpdate}
                 reloadTable={reloadTable}
             />
         </>
