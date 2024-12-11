@@ -1,12 +1,13 @@
 import { getUsersAPI } from '@/services/api';
 import { dateRangeValidate } from '@/services/helper';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, ExportOutlined, ImportOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import { useRef, useState } from 'react';
 import DetailUser from './detail.user';
 import CreateUser from './create.user';
+import ModalImport from './import.user';
 
 type TSearch = {
     fullName: string;
@@ -26,6 +27,8 @@ const TableUser = () => {
     const [userDetail, setUserDetail] = useState<IUserTable | null>(null);
     const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false);
     const [openCreateUser, setOpenCreteUser] = useState<boolean>(false);
+
+    const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
 
     const columns: ProColumns<IUserTable>[] = [
         {
@@ -153,6 +156,20 @@ const TableUser = () => {
                 }
                 headerTitle="Table user"
                 toolBarRender={() => [
+
+                    <Button
+                        type="primary"
+                        icon={<ExportOutlined
+                        />}>
+                        Export
+                    </Button>,
+                    <Button
+                        type="primary"
+                        icon={<ImportOutlined />}
+                        onClick={() => setIsOpenImport(true)}
+                    >
+                        Import
+                    </Button>,
                     <Button
                         key="button"
                         icon={<PlusOutlined />}
@@ -177,6 +194,10 @@ const TableUser = () => {
                 openCreateUser={openCreateUser}
                 setOpenCreteUser={setOpenCreteUser}
                 reloadTable={reloadTable}
+            />
+            <ModalImport
+                setIsOpenImport={setIsOpenImport}
+                isOpenImport={isOpenImport}
             />
         </>
     );
