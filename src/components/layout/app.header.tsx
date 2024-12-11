@@ -26,7 +26,7 @@ const AppHeader = (props: any) => {
         }
     }
 
-    let items = [
+    const items = [
         {
             label: <label
                 style={{ cursor: 'pointer' }}

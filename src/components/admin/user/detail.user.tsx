@@ -45,7 +45,7 @@ const DetailUser = (props: IProps) => {
                 </Descriptions>
             </Drawer >
             :
-            <>No data</>
+            <></>
         }
     </>
     )
