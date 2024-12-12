@@ -11,7 +11,6 @@ interface IProps {
 
 const DetailUser = (props: IProps) => {
     const { isOpenDetail, userDetail, setIsOpenDetail, setUserDetail } = props;
-
     return (<>
 
         {userDetail ?

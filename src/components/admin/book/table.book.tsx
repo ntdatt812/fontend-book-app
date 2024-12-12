@@ -1,9 +1,10 @@
 import { getBooksAPI } from "@/services/api";
-import { DeleteOutlined, EditOutlined, ExportOutlined, ImportOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns, ProTable } from "@ant-design/pro-components";
 import { Button, Popconfirm } from "antd";
 import { useRef, useState } from "react";
-import { CSVLink } from "react-csv";
+// import { CSVLink } from "react-csv";
+import DetailBook from "./detail.book";
 
 type TSearchBook = {
     mainText: string,
@@ -19,7 +20,8 @@ const TableBook = () => {
         pages: 0,
         total: 0
     })
-
+    const [dataDetail, setDataDetail] = useState<IBookTable | null>(null)
+    const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false)
     const columns: ProColumns<IBookTable>[] = [
         {
             dataIndex: 'index',
@@ -30,7 +32,20 @@ const TableBook = () => {
         {
             title: 'ID',
             dataIndex: '_id',
-            hideInSearch: true
+            hideInSearch: true,
+            render(_, entity) {
+                return (
+                    <a
+                        href="#"
+                        onClick={() => {
+                            setDataDetail(entity);
+                            setIsOpenDetail(true)
+                        }}
+                    >
+                        {entity._id}
+                    </a>
+                )
+            },
         },
         {
             title: 'Tên sách',
@@ -59,6 +74,7 @@ const TableBook = () => {
             title: 'Ngày cập nhật',
             dataIndex: 'updatedAt',
             sorter: true,
+            valueType: "date",
             hideInSearch: true,
         },
         {
@@ -100,89 +116,97 @@ const TableBook = () => {
         }
 
     ];
+
     return (
-        <ProTable<IBookTable, TSearchBook>
-            columns={columns}
-            actionRef={actionRef}
-            cardBordered
-            request={async (params, sort, filter) => {
-                console.log(params, sort, filter);
+        <>
+            <ProTable<IBookTable, TSearchBook>
+                columns={columns}
+                actionRef={actionRef}
+                cardBordered
+                request={async (params, sort, filter) => {
+                    console.log(params, sort, filter);
 
-                let queryBook = "";
-                if (params) {
-                    queryBook += `current=${params.current}&pageSize=${params.pageSize}`;
-                    if (params.mainText) {
-                        queryBook += `&mainText=/${params.mainText}/i`
+                    let queryBook = "";
+                    if (params) {
+                        queryBook += `current=${params.current}&pageSize=${params.pageSize}`;
+                        if (params.mainText) {
+                            queryBook += `&mainText=/${params.mainText}/i`
+                        }
+                        if (params.author) {
+                            queryBook += `&author=/${params.author}/i`
+                        }
                     }
-                    if (params.author) {
-                        queryBook += `&author=/${params.author}/i`
-                    }
-                }
-                if (sort) {
-                    if (sort.mainText) {
-                        queryBook += `&sort=${sort.mainText === "ascend" ? "mainText" : "-mainText"}`;
-                    }
-                    if (sort.author) {
-                        queryBook += `&sort=${sort.author === "ascend" ? "author" : "-author"}`;
-                    }
-                    if (sort.price) {
-                        queryBook += `&sort=${sort.price === "ascend" ? "price" : "-price"}`;
-                    }
-                    if (sort.updatedAt) {
-                        queryBook += `&sort=${sort.updatedAt === "ascend" ? "updatedAt" : "-updatedAt"}`;
-                    }
+                    if (sort) {
+                        if (sort.mainText) {
+                            queryBook += `&sort=${sort.mainText === "ascend" ? "mainText" : "-mainText"}`;
+                        }
+                        if (sort.author) {
+                            queryBook += `&sort=${sort.author === "ascend" ? "author" : "-author"}`;
+                        }
+                        if (sort.price) {
+                            queryBook += `&sort=${sort.price === "ascend" ? "price" : "-price"}`;
+                        }
+                        if (sort.updatedAt) {
+                            queryBook += `&sort=${sort.updatedAt === "ascend" ? "updatedAt" : "-updatedAt"}`;
+                        }
+                    } else queryBook += "&sort=-updatedAt";
 
-                } else queryBook += "&sort=-updatedAt";
+                    const res = await getBooksAPI(queryBook);
+                    if (res.data) {
+                        setMeta(res.data.meta)
+                    }
+                    return {
+                        data: res.data?.result,
+                        page: 1,
+                        success: true,
+                        total: res.data?.meta.total
+                    }
+                }}
 
-                const res = await getBooksAPI(queryBook);
-                if (res.data) {
-                    setMeta(res.data.meta)
-                }
-                return {
-                    data: res.data?.result,
-                    page: 1,
-                    success: true,
-                    total: res.data?.meta.total
-                }
-            }}
-
-            rowKey="_id"
-            search={{
-                labelWidth: 'auto',
-            }}
-            pagination={{
-                current: meta.current,
-                pageSize: meta.pageSize,
-                showSizeChanger: true,
-                total: meta.total,
-                showTotal: (total, range) => {
-                    return (<div>{range[0]} - {range[1]} trên {total} rows</div>)
-                }
-            }}
-            headerTitle="Table book"
-            toolBarRender={() => [
-                <Button
-                    type="primary"
-                    icon={<ExportOutlined
-                    />}>
-                    {/* <CSVLink
+                rowKey="_id"
+                search={{
+                    labelWidth: 'auto',
+                }}
+                pagination={{
+                    current: meta.current,
+                    pageSize: meta.pageSize,
+                    showSizeChanger: true,
+                    total: meta.total,
+                    showTotal: (total, range) => {
+                        return (<div>{range[0]} - {range[1]} trên {total} rows</div>)
+                    }
+                }}
+                headerTitle="Table book"
+                toolBarRender={() => [
+                    <Button
+                        type="primary"
+                        icon={<ExportOutlined
+                        />}>
+                        {/* <CSVLink
                         data={dataExport}
                         filename='export-users.csv'
                     >Export</CSVLink> */}
-                    Export
-                </Button>,
-                <Button
-                    key="button"
-                    icon={<PlusOutlined />}
-                    onClick={() => {
-                        actionRef.current?.reload();
-                    }}
-                    type="primary"
-                >
-                    Add book
-                </Button>
-            ]}
-        />
+                        Export
+                    </Button>,
+                    <Button
+                        key="button"
+                        icon={<PlusOutlined />}
+                        onClick={() => {
+                            actionRef.current?.reload();
+                        }}
+                        type="primary"
+                    >
+                        Add book
+                    </Button>
+                ]}
+            />
+            <DetailBook
+                dataDetail={dataDetail}
+                isOpenDetail={isOpenDetail}
+                setIsOpenDetail={setIsOpenDetail}
+                setDataDetail={setDataDetail}
+            />
+        </>
     )
 }
 export default TableBook;
