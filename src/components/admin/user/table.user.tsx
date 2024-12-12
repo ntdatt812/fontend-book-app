@@ -37,7 +37,7 @@ const TableUser = () => {
     const { message, notification } = App.useApp();
 
 
-    const confirm = async (user: IUserTable) => {
+    const handleDeleteUser = async (user: IUserTable) => {
         setIsDelete(true)
         const res = await deleteUserAPI(user._id);
         if (res.data) {
@@ -113,7 +113,7 @@ const TableUser = () => {
                         <Popconfirm
                             title="Xoá người dùng"
                             description={`Bạn có chắc chắn muốn xoá ${entity.fullName} không?`}
-                            onConfirm={() => { confirm(entity) }}
+                            onConfirm={() => { handleDeleteUser(entity) }}
                             okText="Xác nhận"
                             cancelText="Huỷ"
                             placement='leftBottom'
