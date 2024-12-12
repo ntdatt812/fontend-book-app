@@ -1,8 +1,9 @@
 import { FORMATE_DATE_VN } from "@/services/helper";
 import { Badge, Descriptions, Divider, Drawer, Image, Upload, UploadFile, UploadProps } from "antd"
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GetProp } from "antd/lib";
+import { v4 as uuidv4 } from 'uuid';
 
 interface IProps {
     dataDetail: IBookTable | null;
@@ -26,32 +27,32 @@ const DetailBook = (props: IProps) => {
             reader.onload = () => resolve(reader.result as string);
             reader.onerror = (error) => reject(error);
         });
-    const [fileList, setFileList] = useState<UploadFile[]>([
-        {
-            uid: '-1',
-            name: 'image.png',
-            status: 'done',
-            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-        },
-        {
-            uid: '-2',
-            name: 'image.png',
-            status: 'done',
-            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-        },
-        {
-            uid: '-3',
-            name: 'image.png',
-            status: 'done',
-            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-        },
-        {
-            uid: '-4',
-            name: 'image.png',
-            status: 'done',
-            url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-        },
-    ]);
+    const [fileList, setFileList] = useState<UploadFile[]>([]);
+    useEffect(() => {
+        if (dataDetail) {
+            let imgThumbnail: any = {};
+            const imgSlider: UploadFile[] = [];
+            if (dataDetail?.thumbnail) {
+                imgThumbnail = {
+                    uid: uuidv4(),
+                    name: dataDetail.thumbnail,
+                    status: 'done',
+                    url: `${import.meta.env.VITE_BACKEND_URL}/images/book/${dataDetail.thumbnail}`,
+                }
+            }
+            if (dataDetail?.slider && dataDetail.slider.length > 0) {
+                dataDetail.slider.map(item => {
+                    imgSlider.push({
+                        uid: uuidv4(),
+                        name: item,
+                        status: 'done',
+                        url: `${import.meta.env.VITE_BACKEND_URL}/images/book/${item}`,
+                    })
+                })
+            }
+            setFileList([imgThumbnail, ...imgSlider])
+        }
+    }, [dataDetail])
 
     const handlePreview = async (file: UploadFile) => {
         if (!file.url && !file.preview) {
@@ -85,7 +86,7 @@ const DetailBook = (props: IProps) => {
                             <Descriptions.Item label="ID" >{dataDetail._id}</Descriptions.Item>
                             <Descriptions.Item label="Tên sách">{dataDetail.mainText}</Descriptions.Item>
                             <Descriptions.Item label="Tác giả">{dataDetail.author}</Descriptions.Item>
-                            <Descriptions.Item label="Giá tiền">{dataDetail.price}</Descriptions.Item>
+                            <Descriptions.Item label="Giá tiền">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(dataDetail?.price)}</Descriptions.Item>
                             <Descriptions.Item label="Thể loại" span={2}>
                                 <Badge status="success" text={dataDetail.category} />
                             </Descriptions.Item>
