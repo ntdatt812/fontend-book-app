@@ -1,9 +1,9 @@
-import { getUsersAPI } from '@/services/api';
+import { deleteUserAPI, getUsersAPI } from '@/services/api';
 import { dateRangeValidate } from '@/services/helper';
 import { DeleteOutlined, EditOutlined, ExportOutlined, ImportOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable } from '@ant-design/pro-components';
-import { Button } from 'antd';
+import { App, Button, Popconfirm } from 'antd';
 import { useRef, useState } from 'react';
 import DetailUser from './detail.user';
 import CreateUser from './create.user';
@@ -29,11 +29,28 @@ const TableUser = () => {
     const [userDetail, setUserDetail] = useState<IUserTable | null>(null);
     const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false);
     const [openCreateUser, setOpenCreteUser] = useState<boolean>(false);
-
     const [isOpenImport, setIsOpenImport] = useState<boolean>(false);
     const [dataExport, setDataExport] = useState<IUserTable[]>([])
     const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false)
+    const [isDelete, setIsDelete] = useState<boolean>(false)
     const [dataUpdate, setDataUpdate] = useState<IUserTable | null>(null)
+    const { message, notification } = App.useApp();
+
+
+    const confirm = async (user: IUserTable) => {
+        setIsDelete(true)
+        const res = await deleteUserAPI(user._id);
+        if (res.data) {
+            message.success(`Đã xoá user ${user.fullName} khỏi danh sách!`)
+        } else {
+            notification.error({
+                message: "Có lỗi xảy ra!",
+                description: res.message
+            })
+        }
+        reloadTable()
+        setIsDelete(false)
+    };
 
     const columns: ProColumns<IUserTable>[] = [
         {
@@ -86,18 +103,31 @@ const TableUser = () => {
                     < >
                         <EditOutlined
                             style={{
-                                marginRight: "15px", color: "orange", cursor: "pointer"
+                                marginRight: "25px", color: "orange", cursor: "pointer"
                             }}
                             onClick={() => {
                                 setIsOpenUpdate(true)
                                 setDataUpdate(entity)
                             }}
                         />
-                        <DeleteOutlined
-                            style={{
-                                color: "red", cursor: "pointer"
+                        <Popconfirm
+                            title="Xoá người dùng"
+                            description={`Bạn có chắc chắn muốn xoá ${entity.fullName} không?`}
+                            onConfirm={() => { confirm(entity) }}
+                            okText="Xác nhận"
+                            cancelText="Huỷ"
+                            placement='leftBottom'
+                            okButtonProps={{
+                                loading: isDelete
                             }}
-                        />
+                        >
+                            <DeleteOutlined
+                                style={{
+                                    color: "red", cursor: "pointer"
+                                }}
+                            />
+                        </Popconfirm>
+
                     </>
                 )
             },
