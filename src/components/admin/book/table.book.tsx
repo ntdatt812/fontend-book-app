@@ -5,6 +5,7 @@ import { Button, Popconfirm } from "antd";
 import { useRef, useState } from "react";
 // import { CSVLink } from "react-csv";
 import DetailBook from "./detail.book";
+import CreateBook from "./create.book";
 
 type TSearchBook = {
     mainText: string,
@@ -22,6 +23,7 @@ const TableBook = () => {
     })
     const [dataDetail, setDataDetail] = useState<IBookTable | null>(null)
     const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false)
+    const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
     const columns: ProColumns<IBookTable>[] = [
         {
             dataIndex: 'index',
@@ -193,6 +195,7 @@ const TableBook = () => {
                         icon={<PlusOutlined />}
                         onClick={() => {
                             actionRef.current?.reload();
+                            setIsOpenCreate(true)
                         }}
                         type="primary"
                     >
@@ -205,6 +208,10 @@ const TableBook = () => {
                 isOpenDetail={isOpenDetail}
                 setIsOpenDetail={setIsOpenDetail}
                 setDataDetail={setDataDetail}
+            />
+            <CreateBook
+                isOpenCreate={isOpenCreate}
+                setIsOpenCreate={setIsOpenCreate}
             />
         </>
     )
