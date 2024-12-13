@@ -54,3 +54,21 @@ export const getCategoryAPI = () => {
     const urlBackend = `/api/v1/database/category`;
     return axios.get<IBackendRes<string[]>>(urlBackend)
 }
+
+export const uploadFileAPI = (file: any, folder: string) => {
+    const bodyFormData = new FormData();
+    bodyFormData.append('fileImg', file);
+    return axios<IBackendRes<{
+        fileUploaded: string
+    }>>(
+        {
+            method: "post",
+            url: "/api/v1/file/upload",
+            data: bodyFormData,
+            headers: {
+                "Content-Type": "multipart/form-data",
+                "upload-type": folder
+            }
+        }
+    )
+}

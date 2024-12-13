@@ -1,10 +1,19 @@
-import { getCategoryAPI } from "@/services/api";
+import { getCategoryAPI, uploadFileAPI } from "@/services/api";
 import { MAX_UPLOAD_IMAGE_SIZE } from "@/services/helper";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { App, Col, Divider, Form, GetProp, Image, Input, InputNumber, Modal, Row, Select, Upload, UploadFile, UploadProps } from "antd"
+import {
+    App, Col, Divider, Form, GetProp,
+    Image, Input, InputNumber, Modal, Row,
+    Select, Upload, UploadFile, UploadProps
+} from "antd"
 import { UploadChangeParam } from "antd/es/upload";
 import { FormProps } from "antd/lib";
 import { useEffect, useState } from "react";
+import { UploadRequestOption as RcCustomRequestOptions } from 'rc-upload/lib/interface';
+
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+
+type UserUploadType = "thumbnail" | "slider";
 
 interface IProps {
     isOpenCreate: boolean;
@@ -12,20 +21,14 @@ interface IProps {
 }
 
 type FieldType = {
-    _id: string,
-    thumbnail: string,
-    slider: string[],
-    mainText: string,
-    author: string,
-    price: number,
-    sold: number,
-    quantity: number,
-    category: string,
-    createdAt: Date,
-    updatedAt: Date,
+    mainText: string;
+    author: string;
+    price: number;
+    category: string;
+    quantity: number;
+    thumbnail: any;
+    slider: any;
 };
-
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const CreateBook = (props: IProps) => {
     const { isOpenCreate, setIsOpenCreate } = props;
@@ -55,7 +58,9 @@ const CreateBook = (props: IProps) => {
             }
         }
         fetchCategory();
-    }, [])
+    }, []);
+    const [fileListThumbnail, setFileListThumbnail] = useState<UploadFile[]>([]);
+    const [fileListSlider, setFileListSlider] = useState<UploadFile[]>([]);
 
     const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
         setLoadingSubmit(true)
@@ -80,7 +85,7 @@ const CreateBook = (props: IProps) => {
         if (!isLt2M) {
             message.error(`Image must smaller than ${MAX_UPLOAD_IMAGE_SIZE}MB!`);
         }
-        return isJpgOrPng && isLt2M;
+        return isJpgOrPng && isLt2M || Upload.LIST_IGNORE;
     };
 
     const handlePreview = async (file: UploadFile) => {
@@ -91,7 +96,18 @@ const CreateBook = (props: IProps) => {
         setPreviewImage(file.url || (file.preview as string));
         setPreviewOpen(true);
     };
-    const handleChange = (info: UploadChangeParam, type: "thumbnail" | "slider") => {
+
+    const handleRemove = async (file: UploadFile, type: UserUploadType) => {
+        if (type === 'thumbnail') {
+            setFileListThumbnail([])
+        }
+        if (type === 'slider') {
+            const newSlider = fileListSlider.filter(x => x.uid !== file.uid);
+            setFileListSlider(newSlider);
+        }
+    };
+
+    const handleChange = (info: UploadChangeParam, type: UserUploadType) => {
         if (info.file.status === 'uploading') {
             type === "slider" ? setLoadingSlider(true) : setLoadingThumbnail(true);
             return;
@@ -101,18 +117,40 @@ const CreateBook = (props: IProps) => {
             type === "slider" ? setLoadingSlider(false) : setLoadingThumbnail(false);
         }
     };
-    const handleUploadFile: UploadProps['customRequest'] = ({ file, onSuccess, onError }) => {
-        setTimeout(() => {
-            if (onSuccess)
-                onSuccess("ok");
-        }, 1000);
-    };
+
+    const handleUploadFile = async (options: RcCustomRequestOptions, type: UserUploadType) => {
+        const { onSuccess } = options;
+        const file = options.file as UploadFile;
+        const res = await uploadFileAPI(file, "book");
+
+        if (res && res.data) {
+            const uploadedFile: any = {
+                uid: file.uid,
+                name: res.data.fileUploaded,
+                status: 'done',
+                url: `${import.meta.env.VITE_BACKEND_URL}/images/book/${res.data.fileUploaded}`
+            }
+            if (type === "thumbnail") {
+                setFileListThumbnail([uploadedFile]);
+            }
+            if (type === "slider") {
+                setFileListThumbnail((prevState) => [...prevState, { ...uploadedFile }]);
+
+            }
+            if (onSuccess) {
+                onSuccess('ok')
+            } else {
+                message.error(res.message);
+            }
+        }
+    }
     const normFile = (e: any) => {
         if (Array.isArray(e)) {
             return e;
         }
         return e?.fileList;
     };
+
 
     return (
         <>
@@ -121,6 +159,8 @@ const CreateBook = (props: IProps) => {
                 onOk={form.submit}
                 onCancel={() => {
                     form.resetFields();
+                    setFileListSlider([]);
+                    setFileListThumbnail([]);
                     setIsOpenCreate(false)
                 }}
                 width={"50vw"}
@@ -144,7 +184,7 @@ const CreateBook = (props: IProps) => {
                             <Form.Item<FieldType>
                                 label="Tên sách"
                                 name="mainText"
-                                rules={[{ required: true, message: 'Sách không tên hả???' }]}
+                                rules={[{ required: true, message: 'Tên sách không được để trống!' }]}
                             >
                                 <Input />
                             </Form.Item>
@@ -153,7 +193,7 @@ const CreateBook = (props: IProps) => {
                             <Form.Item<FieldType>
                                 label="Tác giả"
                                 name="author"
-                                rules={[{ required: true, message: 'Ai viết sách zậy mày?!' }]}
+                                rules={[{ required: true, message: 'Tác giả không được để trống!' }]}
                             >
                                 <Input />
                             </Form.Item>
@@ -162,7 +202,7 @@ const CreateBook = (props: IProps) => {
                             <Form.Item<FieldType>
                                 label="Giá tiền"
                                 name="price"
-                                rules={[{ required: true, message: 'Nhập cái giá vào!' }]}
+                                rules={[{ required: true, message: 'Giá tiền  không được để trống!' }]}
                             >
                                 <InputNumber
                                     min={0} // Không cho phép giá trị âm
@@ -179,7 +219,7 @@ const CreateBook = (props: IProps) => {
                             <Form.Item<FieldType>
                                 label="Thể loại"
                                 name="category"
-                                rules={[{ required: true, message: 'Thể loại sách là gì? Chọn đi hộ tao' }]}
+                                rules={[{ required: true, message: 'Chưa chọn thể loại sách!' }]}
                             >
                                 <Select
                                     showSearch
@@ -192,7 +232,7 @@ const CreateBook = (props: IProps) => {
                             <Form.Item<FieldType>
                                 label="Số lượng"
                                 name="quantity"
-                                rules={[{ required: true, message: 'Có bao nhiêu cuốn thì nhập vào!' }]}
+                                rules={[{ required: true, message: 'Số lượng  không được để trống!' }]}
                             >
                                 <InputNumber min={1} style={{ width: " 100%" }} />
                             </Form.Item>
@@ -201,7 +241,7 @@ const CreateBook = (props: IProps) => {
                             <Form.Item
                                 label="Ảnh thumbnail"
                                 name="thumbnail"
-                                rules={[{ required: true, message: "Upload ảnh thumbnail đi bạn ê!" }]}
+                                rules={[{ required: true, message: "Cần upload ảnh thumbnail!" }]}
                                 valuePropName="fileList"
                                 getValueFromEvent={normFile}
 
@@ -212,10 +252,12 @@ const CreateBook = (props: IProps) => {
                                     className="avatar-uploader"
                                     maxCount={1}
                                     multiple={false}
-                                    customRequest={handleUploadFile}
+                                    customRequest={(options) => handleUploadFile(options, 'thumbnail')}
                                     beforeUpload={beforeUpload}
                                     onChange={(info) => handleChange(info, "thumbnail")}
                                     onPreview={handlePreview}
+                                    onRemove={(file) => { handleRemove(file, 'thumbnail') }}
+                                    fileList={fileListThumbnail}
                                 >
                                     <div>
                                         {loadingThumbnail ? <LoadingOutlined /> : <PlusOutlined />}
@@ -228,19 +270,21 @@ const CreateBook = (props: IProps) => {
                             <Form.Item
                                 label="Ảnh slider"
                                 name="slider"
-                                rules={[{ required: true, message: "Upload ảnh thumbnail đi bạn!" }]}
+                                rules={[{ required: true, message: "Cần upload ảnh slider!" }]}
                                 valuePropName="fileList"
                                 getValueFromEvent={normFile}
                             >
                                 <Upload
+                                    multiple
                                     listType="picture-card"
                                     onPreview={handlePreview}
                                     className="avatar-uploader"
-                                    multiple
-                                    customRequest={handleUploadFile}
+                                    customRequest={(options) => handleUploadFile(options, 'slider')}
+                                    onRemove={(file) => { handleRemove(file, 'slider') }}
                                     beforeUpload={beforeUpload}
                                     onChange={(info) => handleChange(info, "slider")}
                                     onPreview={handlePreview}
+                                    fileList={fileListSlider}
                                 >
                                     <div>
                                         {loadingSlider ? <LoadingOutlined /> : <PlusOutlined />}
@@ -266,4 +310,5 @@ const CreateBook = (props: IProps) => {
         </>
     )
 }
+
 export default CreateBook
