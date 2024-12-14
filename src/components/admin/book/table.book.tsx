@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 // import { CSVLink } from "react-csv";
 import DetailBook from "./detail.book";
 import CreateBook from "./create.book";
+import UpdateBook from "./update.book";
 
 type TSearchBook = {
     mainText: string,
@@ -21,9 +22,13 @@ const TableBook = () => {
         pages: 0,
         total: 0
     })
-    const [dataDetail, setDataDetail] = useState<IBookTable | null>(null)
+    const [dataDetail, setDataDetail] = useState<IBookTable | null>(null);
+    const [dataUpdate, setDataUpdate] = useState<IBookTable | null>(null);
+
     const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false)
     const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
+    const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false)
+
     const columns: ProColumns<IBookTable>[] = [
         {
             dataIndex: 'index',
@@ -90,8 +95,8 @@ const TableBook = () => {
                                 marginRight: "25px", color: "orange", cursor: "pointer"
                             }}
                             onClick={() => {
-                                // setIsOpenUpdate(true)
-                                // setDataUpdate(entity)
+                                setIsOpenUpdate(true)
+                                setDataUpdate(entity)
                             }}
                         />
                         <Popconfirm
@@ -214,6 +219,14 @@ const TableBook = () => {
                 isOpenCreate={isOpenCreate}
                 setIsOpenCreate={setIsOpenCreate}
                 reloadTableBook={reloadTableBook}
+            />
+            <UpdateBook
+                setDataUpdate={setDataUpdate}
+                dataUpdate={dataUpdate}
+                isOpenUpdate={isOpenUpdate}
+                setIsOpenUpdate={setIsOpenUpdate}
+                reloadTableBook={reloadTableBook}
+
             />
         </>
     )
