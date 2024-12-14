@@ -54,7 +54,6 @@ export const getCategoryAPI = () => {
     const urlBackend = `/api/v1/database/category`;
     return axios.get<IBackendRes<string[]>>(urlBackend)
 }
-
 export const uploadFileAPI = (file: any, folder: string) => {
     const bodyFormData = new FormData();
     bodyFormData.append('fileImg', file);
@@ -71,4 +70,8 @@ export const uploadFileAPI = (file: any, folder: string) => {
             }
         }
     )
+}
+export const createBookAPI = (thumbnail: string, slider: string[], mainText: string, author: string, price: number, quantity: number, category: string) => {
+    const urlBackend = `/api/v1/book`;
+    return axios.post<IBackendRes<IRegister>>(urlBackend, { thumbnail, slider, mainText, author, price, quantity, category })
 }

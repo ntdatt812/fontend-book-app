@@ -1,4 +1,4 @@
-import { getCategoryAPI, uploadFileAPI } from "@/services/api";
+import { createBookAPI, getCategoryAPI, uploadFileAPI } from "@/services/api";
 import { MAX_UPLOAD_IMAGE_SIZE } from "@/services/helper";
 import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import {
@@ -18,6 +18,7 @@ type UserUploadType = "thumbnail" | "slider";
 interface IProps {
     isOpenCreate: boolean;
     setIsOpenCreate: (v: boolean) => void;
+    reloadTableBook: () => void;
 }
 
 type FieldType = {
@@ -31,10 +32,12 @@ type FieldType = {
 };
 
 const CreateBook = (props: IProps) => {
-    const { isOpenCreate, setIsOpenCreate } = props;
+    const { isOpenCreate, setIsOpenCreate,
+        reloadTableBook
+    } = props;
     const [form] = Form.useForm();
     const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false)
-    const { message } = App.useApp()
+    const { message, notification } = App.useApp()
 
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
@@ -62,9 +65,29 @@ const CreateBook = (props: IProps) => {
     const [fileListThumbnail, setFileListThumbnail] = useState<UploadFile[]>([]);
     const [fileListSlider, setFileListSlider] = useState<UploadFile[]>([]);
 
-    const onFinish: FormProps<FieldType>['onFinish'] = (values) => {
+    const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
         setLoadingSubmit(true)
-        console.log('Success:', values);
+        const sliderBook = fileListSlider.map((item) => item.name) ?? [];
+        // console.log('Success:', values, fileListThumbnail[0].name, sliderBook);
+        // console.log("values fileListThumbnail: ", fileListThumbnail)
+        // console.log("values fileListSlider: ", fileListSlider)
+        const res = await createBookAPI(fileListThumbnail[0].name, sliderBook, values.mainText, values.author, values.price, values.quantity, values.category);
+        if (res.data) {
+            notification.success({
+                message: "Thành công!",
+                description: `Sách ${values.mainText} đã được thêm.`
+            })
+            form.resetFields()
+            setFileListSlider([]);
+            setFileListThumbnail([]);
+            setIsOpenCreate(false);
+            reloadTableBook();
+        } else {
+            notification.error({
+                message: "Có lỗi xảy ra!",
+                description: res.message
+            })
+        }
         setLoadingSubmit(false)
     };
 
@@ -131,11 +154,10 @@ const CreateBook = (props: IProps) => {
                 url: `${import.meta.env.VITE_BACKEND_URL}/images/book/${res.data.fileUploaded}`
             }
             if (type === "thumbnail") {
-                setFileListThumbnail([uploadedFile]);
+                setFileListThumbnail([{ ...uploadedFile }]);
             }
             if (type === "slider") {
-                setFileListThumbnail((prevState) => [...prevState, { ...uploadedFile }]);
-
+                setFileListSlider((prevState) => [...prevState, { ...uploadedFile }])
             }
             if (onSuccess) {
                 onSuccess('ok')

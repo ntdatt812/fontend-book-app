@@ -118,6 +118,9 @@ const TableBook = () => {
         }
 
     ];
+    const reloadTableBook = () => {
+        actionRef.current?.reload();
+    }
 
     return (
         <>
@@ -127,7 +130,6 @@ const TableBook = () => {
                 cardBordered
                 request={async (params, sort, filter) => {
                     console.log(params, sort, filter);
-
                     let queryBook = "";
                     if (params) {
                         queryBook += `current=${params.current}&pageSize=${params.pageSize}`;
@@ -138,20 +140,20 @@ const TableBook = () => {
                             queryBook += `&author=/${params.author}/i`
                         }
                     }
-                    if (sort) {
-                        if (sort.mainText) {
-                            queryBook += `&sort=${sort.mainText === "ascend" ? "mainText" : "-mainText"}`;
-                        }
-                        if (sort.author) {
-                            queryBook += `&sort=${sort.author === "ascend" ? "author" : "-author"}`;
-                        }
-                        if (sort.price) {
-                            queryBook += `&sort=${sort.price === "ascend" ? "price" : "-price"}`;
-                        }
-                        if (sort.updatedAt) {
-                            queryBook += `&sort=${sort.updatedAt === "ascend" ? "updatedAt" : "-updatedAt"}`;
-                        }
+
+                    if (sort.mainText) {
+                        queryBook += `&sort=${sort.mainText === "ascend" ? "mainText" : "-mainText"}`;
+                    }
+                    if (sort.author) {
+                        queryBook += `&sort=${sort.author === "ascend" ? "author" : "-author"}`;
+                    }
+                    if (sort.price) {
+                        queryBook += `&sort=${sort.price === "ascend" ? "price" : "-price"}`;
+                    }
+                    if (sort.updatedAt) {
+                        queryBook += `&sort=${sort.updatedAt === "ascend" ? "updatedAt" : "-updatedAt"}`;
                     } else queryBook += "&sort=-updatedAt";
+                    console.log(queryBook)
 
                     const res = await getBooksAPI(queryBook);
                     if (res.data) {
@@ -194,7 +196,6 @@ const TableBook = () => {
                         key="button"
                         icon={<PlusOutlined />}
                         onClick={() => {
-                            actionRef.current?.reload();
                             setIsOpenCreate(true)
                         }}
                         type="primary"
@@ -212,6 +213,7 @@ const TableBook = () => {
             <CreateBook
                 isOpenCreate={isOpenCreate}
                 setIsOpenCreate={setIsOpenCreate}
+                reloadTableBook={reloadTableBook}
             />
         </>
     )
