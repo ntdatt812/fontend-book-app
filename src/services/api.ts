@@ -79,3 +79,7 @@ export const updateBookAPI = (id: string, thumbnail: string, slider: string[], m
     const urlBackend = `/api/v1/book/${id}`;
     return axios.put<IBackendRes<IRegister>>(urlBackend, { thumbnail, slider, mainText, author, price, quantity, category })
 }
+export const deleteBookAPI = (id: string) => {
+    const urlBackend = `/api/v1/book/${id}`;
+    return axios.delete<IBackendRes<IRegister>>(urlBackend)
+}

@@ -1,12 +1,13 @@
-import { getBooksAPI } from "@/services/api";
+import { deleteBookAPI, getBooksAPI } from "@/services/api";
 import { DeleteOutlined, EditOutlined, ExportOutlined, PlusOutlined } from "@ant-design/icons";
 import { ActionType, ProColumns, ProTable } from "@ant-design/pro-components";
-import { Button, Popconfirm } from "antd";
+import { App, Button, Popconfirm } from "antd";
 import { useRef, useState } from "react";
 // import { CSVLink } from "react-csv";
 import DetailBook from "./detail.book";
 import CreateBook from "./create.book";
 import UpdateBook from "./update.book";
+import { CSVLink } from "react-csv";
 
 type TSearchBook = {
     mainText: string,
@@ -15,6 +16,7 @@ type TSearchBook = {
 };
 
 const TableBook = () => {
+
     const actionRef = useRef<ActionType>();
     const [meta, setMeta] = useState({
         current: 1,
@@ -28,7 +30,11 @@ const TableBook = () => {
     const [isOpenDetail, setIsOpenDetail] = useState<boolean>(false)
     const [isOpenCreate, setIsOpenCreate] = useState<boolean>(false)
     const [isOpenUpdate, setIsOpenUpdate] = useState<boolean>(false)
+    const [loadingDelete, setLoadingDelete] = useState<boolean>(false)
 
+    const [dataExport, setDataExport] = useState<IBookTable[]>([])
+
+    const { message, notification } = App.useApp()
     const columns: ProColumns<IBookTable>[] = [
         {
             dataIndex: 'index',
@@ -101,13 +107,13 @@ const TableBook = () => {
                         />
                         <Popconfirm
                             title="Xoá người dùng"
-                            // description={`Bạn có chắc chắn muốn xoá ${entity.fullName} không?`}
-                            // onConfirm={() => { handleDeleteUser(entity) }}
+                            description={<>Bạn có chắc chắn muốn xoá sách <strong>{entity.mainText}</strong> không?</>}
+                            onConfirm={() => { handleDeleteBook(entity) }}
                             okText="Xác nhận"
                             cancelText="Huỷ"
                             placement='leftBottom'
                             okButtonProps={{
-                                // loading: isDelete
+                                loading: loadingDelete
                             }}
                         >
                             <DeleteOutlined
@@ -125,6 +131,21 @@ const TableBook = () => {
     ];
     const reloadTableBook = () => {
         actionRef.current?.reload();
+    }
+
+    const handleDeleteBook = async (book: IBookTable) => {
+        setLoadingDelete(true)
+        const res = await deleteBookAPI(book._id);
+        if (res.data) {
+            message.success(<>Đã xoá sách <strong>{book.mainText}</strong></>);
+            reloadTableBook()
+        } else {
+            notification.error({
+                message: "Có lỗi xảy ra!",
+                description: res.message
+            })
+        }
+        setLoadingDelete(false)
     }
 
     return (
@@ -162,7 +183,8 @@ const TableBook = () => {
 
                     const res = await getBooksAPI(queryBook);
                     if (res.data) {
-                        setMeta(res.data.meta)
+                        setMeta(res.data.meta);
+                        setDataExport(res.data.result ?? [])
                     }
                     return {
                         data: res.data?.result,
@@ -187,16 +209,16 @@ const TableBook = () => {
                 }}
                 headerTitle="Table book"
                 toolBarRender={() => [
-                    <Button
+                    <CSVLink
+                        data={dataExport}
+                        filename='export-books.csv'
+                    >   <Button
                         type="primary"
                         icon={<ExportOutlined
                         />}>
-                        {/* <CSVLink
-                        data={dataExport}
-                        filename='export-users.csv'
-                    >Export</CSVLink> */}
-                        Export
-                    </Button>,
+                            Export
+                        </Button>
+                    </CSVLink>,
                     <Button
                         key="button"
                         icon={<PlusOutlined />}
