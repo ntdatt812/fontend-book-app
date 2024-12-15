@@ -1,0 +1,101 @@
+.homepage-container {
+    .customize-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px 10px; // khoảng cách giữa các hàng và cột
+
+        .column {
+            width: calc(20% - 8px);
+            transition: all 0.3s ease; // hiệu ứng mượt khi hover
+            position: relative;
+            overflow: hidden;
+
+            &:hover {
+                transform: translateY(-5px); // nổi lên khi hover
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); // bóng mờ rõ hơn
+                border-radius: 8px; // bo góc mềm mại hơn
+                background: linear-gradient(145deg, #f3f3f3, #e3e3e3); // thêm nền gradient
+            }
+
+            .wrapper {
+                cursor: pointer;
+                background: #ffffff; // nền trắng tinh khiết
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // bóng nhẹ
+                border-radius: 8px; // bo góc mềm mại
+                padding: 1rem;
+                transition: box-shadow 0.3s ease, transform 0.3s ease;
+
+                &:hover {
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); // bóng đậm hơn
+                }
+
+                .price {
+                    font-size: 1rem;
+                    /* Tăng kích thước chữ */
+                    font-weight: bold;
+                    /* Chữ đậm */
+                    color: #e74c3c;
+                    /* Màu đỏ nổi bật */
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    /* Đổ bóng nhẹ */
+                    margin-bottom: 0.5rem;
+                }
+
+                .text {
+                    padding: 0.5rem 0;
+                    font-size: 0.9rem; // chữ vừa phải
+                    color: #333333; // màu chữ tối hơn
+                    font-weight: 500; // chữ đậm nhẹ
+                    text-align: center; // căn giữa
+                }
+
+                .rating {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between; // căn giữa rating
+                    gap: 5px; // khoảng cách giữa icon và số
+                    font-size: 0.8rem;
+                    color: #f39c12; // màu vàng nhấn mạnh rating
+                }
+            }
+        }
+
+        .thumbnail {
+            max-height: 180px;
+            max-width: 180px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 8px; // bo góc hình ảnh
+
+            img {
+                max-width: 100%;
+                max-height: 100%;
+                background-color: #ffffff;
+                object-fit: cover; // ảnh luôn vừa khung
+                transition: transform 0.3s ease;
+
+                &:hover {
+                    transform: scale(1.1); // zoom ảnh nhẹ khi hover
+                }
+            }
+        }
+
+        // Responsive: Màn hình nhỏ hơn 600px
+        @media screen and (max-width: 600px) {
+            .column {
+                flex: unset;
+                width: calc(50% - 8px);
+                flex-wrap: wrap;
+            }
+        }
+
+        // Responsive: Màn hình từ 601px đến 800px
+        @media screen and (max-width: 800px) and (min-width: 601px) {
+            .column {
+                flex: unset;
+                width: calc(25% - 8px);
+                flex-wrap: wrap;
+            }
+        }
+    }
+}
