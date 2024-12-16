@@ -3,12 +3,22 @@ import { FilterTwoTone, ReloadOutlined } from "@ant-design/icons"
 import { Button, Checkbox, Col, Divider, Form, InputNumber, Pagination, Rate, Row, Spin, Tabs } from "antd"
 import { TabsProps } from "antd/lib";
 import { useEffect, useState } from "react";
+import { FormProps } from "antd";
 import 'style/home.scss'
+
+type FieldType = {
+    category: string[];
+    range: {
+        from: number,
+        to: number,
+    }
+}
+
 const HomePage = () => {
 
     const [listBooks, setListBooks] = useState<IBookTable[]>([]);
     const [current, setCurrent] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(5);
+    const [pageSize, setPageSize] = useState<number>(10);
     const [total, setTotal] = useState<number>(0);
 
     const [filter, setFilter] = useState<string>("");
@@ -34,7 +44,7 @@ const HomePage = () => {
     }, [])
     useEffect(() => {
         fetchBooks();
-    }, [current, filter, pageSize, sortQuery])
+    }, [current, filter, pageSize, sortQuery]);
 
     const fetchBooks = async () => {
         setLoadingBook(true)
@@ -66,26 +76,45 @@ const HomePage = () => {
     }
 
     const handleChangeFilter = (changedValues: any, values: any) => {
-        console.log(">>> check handleChangeFilter", changedValues, values)
+        console.log(">>> check handleChangeFilter", changedValues, values);
+        if (changedValues.category) {
+            const cate = values.category;
+            if (cate && cate.length > 0) {
+                const f = cate.join(',');
+                setFilter(`category=${f}`);
+            } else {
+                setFilter('');
+            }
+        }
+    }
+    const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+        if (values.range.from >= 0 && values.range.to >= 0) {
+            let f = `price>=${values.range.from}&price<=${values.range.to}`;
+            if (values.category) {
+                const cate = values.category.join(',');
+                f += `&category${cate}`
+            }
+            setFilter(f)
+        }
     }
     const items: TabsProps['items'] = [
         {
-            key: '1',
+            key: 'sort=-sold',
             label: 'Phổ biến',
             children: <></>,
         },
         {
-            key: '2',
+            key: 'sort=-createdAt',
             label: 'Hàng mới',
             children: <></>,
         },
         {
-            key: '3',
+            key: 'sort=price',
             label: 'Giá thấp đến cao',
             children: <></>,
         },
         {
-            key: '4',
+            key: 'sort=-price',
             label: 'Giá cao đến thấp',
             children: <></>,
         },
@@ -99,9 +128,13 @@ const HomePage = () => {
                         <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
                             <div style={{ display: "flex", justifyContent: "space-between" }}>
                                 <strong><FilterTwoTone />&nbsp;&nbsp;&nbsp;Bộ lọc tìm kiếm</strong>
-                                <ReloadOutlined title="Tìm kiếm" onClick={() => { }} />
+                                <ReloadOutlined title="Tìm kiếm" onClick={() => {
+                                    form.resetFields();
+                                    setFilter('')
+                                }} />
                             </div>
                             <Form
+                                onFinish={onFinish}
                                 form={form}
                                 onValuesChange={(changedValues, values) => handleChangeFilter(changedValues, values)}
                             >
