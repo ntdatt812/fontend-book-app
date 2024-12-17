@@ -1,3 +1,4 @@
+import LoaderBook from "@/components/client/book/loader.book";
 import { getBookDetailAPI } from "@/services/api";
 import { App } from "antd";
 import DetailBook from "components/client/book/detail.book"
@@ -8,6 +9,7 @@ const BookPage = () => {
     const { id } = useParams();
     const { notification } = App.useApp()
     const [dataDetail, setDataDetail] = useState<IBookTable | null>(null)
+    const [loadingDetail, setLoadingDetail] = useState<boolean>(false)
 
     useEffect(() => {
         if (id) {
@@ -16,7 +18,8 @@ const BookPage = () => {
     }, [id])
 
     const fetchBookDetail = async () => {
-        const res = await getBookDetailAPI(id);
+        setLoadingDetail(true);
+        const res = await getBookDetailAPI(id!);
         if (res.data) {
             console.log("check id: ", res)
             setDataDetail(res.data)
@@ -26,12 +29,19 @@ const BookPage = () => {
                 description: res.message
             })
         }
+        setLoadingDetail(false);
     }
 
     return (
-        <DetailBook
-            dataDetail={dataDetail}
-        />
+        <div>
+            {loadingDetail ?
+                <  LoaderBook />
+                :
+                <DetailBook
+                    dataDetail={dataDetail}
+                />}
+        </div>
+
     )
 }
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FormProps } from "antd";
 import 'style/home.scss'
 import { useNavigate } from "react-router-dom";
+import MobileFilter from "@/components/client/book/mobile.filter";
 
 type FieldType = {
     category: string[];
@@ -26,6 +27,7 @@ const HomePage = () => {
     const [loadingBook, setLoadingBook] = useState<boolean>(false);
     const [sortQuery, setSortQuery] = useState<string>("sort=-sold");
     const [form] = Form.useForm();
+    const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
 
     const [dataCategory, setDataCategory] = useState<{
         label: string, value: string
@@ -124,158 +126,175 @@ const HomePage = () => {
     ];
 
     return (
-        <div style={{ background: '#efefef', padding: "20px 0" }}>
-            <div className="homepage-container" style={{ maxWidth: 1440, margin: "0 auto" }}>
-                <Row gutter={[20, 20]}>
-                    <Col md={4} sm={0} xs={0}  >
-                        <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                                <strong><FilterTwoTone />&nbsp;&nbsp;&nbsp;Bộ lọc tìm kiếm</strong>
-                                <ReloadOutlined title="Tìm kiếm" onClick={() => {
-                                    form.resetFields();
-                                    setFilter('')
-                                }} />
-                            </div>
-                            <Form
-                                onFinish={onFinish}
-                                form={form}
-                                onValuesChange={(changedValues, values) => handleChangeFilter(changedValues, values)}
-                            >
-                                <Form.Item
-                                    name="category"
-                                    label="Danh mục sản phẩm"
-                                    labelCol={{ span: 24 }}
+        <>
+            <div style={{ background: '#efefef', padding: "20px 0" }}>
+                <div className="homepage-container" style={{ maxWidth: 1440, margin: "0 auto" }}>
+                    <Row gutter={[20, 20]}>
+                        <Col md={4} sm={0} xs={0}  >
+                            <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                    <strong><FilterTwoTone />&nbsp;&nbsp;&nbsp;Bộ lọc tìm kiếm</strong>
+                                    <ReloadOutlined title="Tìm kiếm" onClick={() => {
+                                        form.resetFields();
+                                        setFilter('')
+                                    }} />
+                                </div>
+                                <Form
+                                    onFinish={onFinish}
+                                    form={form}
+                                    onValuesChange={(changedValues, values) => handleChangeFilter(changedValues, values)}
                                 >
-                                    <Checkbox.Group style={{ width: '100%' }}>
-                                        <Row>
-                                            {dataCategory.map((item, index) =>
-                                                <Col span={24} key={`index-${index}`} style={{ padding: '7px 0' }}>
-                                                    <Checkbox value={item.value}>{item.label}</Checkbox>
-                                                </Col>
-                                            )}
+                                    <Form.Item
+                                        name="category"
+                                        label="Danh mục sản phẩm"
+                                        labelCol={{ span: 24 }}
+                                    >
+                                        <Checkbox.Group style={{ width: '100%' }}>
+                                            <Row>
+                                                {dataCategory.map((item, index) =>
+                                                    <Col span={24} key={`index-${index}`} style={{ padding: '7px 0' }}>
+                                                        <Checkbox value={item.value}>{item.label}</Checkbox>
+                                                    </Col>
+                                                )}
+                                            </Row>
+                                        </Checkbox.Group>
+                                    </Form.Item>
+                                    <Divider />
+                                    <Form.Item
+                                        label="Khoảng giá"
+                                        labelCol={{ span: 24 }}
+                                    >
+                                        <Row gutter={[10, 10]} style={{ width: "100%" }}>
+                                            <Col xl={11} md={24}>
+                                                <Form.Item name={["range", 'from']}>
+                                                    <InputNumber
+                                                        name='from'
+                                                        min={0}
+                                                        placeholder="đ TỪ"
+                                                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                        style={{ width: '100%' }}
+                                                        controls={false}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col xl={2} md={0}>
+                                                <div > - </div>
+                                            </Col>
+                                            <Col xl={11} md={24}>
+                                                <Form.Item name={["range", 'to']}>
+                                                    <InputNumber
+                                                        name='to'
+                                                        min={0}
+                                                        placeholder="đ ĐẾN"
+                                                        formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                                                        style={{ width: '100%' }}
+                                                        controls={false}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
                                         </Row>
-                                    </Checkbox.Group>
-                                </Form.Item>
-                                <Divider />
-                                <Form.Item
-                                    label="Khoảng giá"
-                                    labelCol={{ span: 24 }}
-                                >
-                                    <Row gutter={[10, 10]} style={{ width: "100%" }}>
-                                        <Col xl={11} md={24}>
-                                            <Form.Item name={["range", 'from']}>
-                                                <InputNumber
-                                                    name='from'
-                                                    min={0}
-                                                    placeholder="đ TỪ"
-                                                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                                    style={{ width: '100%' }}
-                                                    controls={false}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xl={2} md={0}>
-                                            <div > - </div>
-                                        </Col>
-                                        <Col xl={11} md={24}>
-                                            <Form.Item name={["range", 'to']}>
-                                                <InputNumber
-                                                    name='to'
-                                                    min={0}
-                                                    placeholder="đ ĐẾN"
-                                                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                                    style={{ width: '100%' }}
-                                                    controls={false}
-                                                />
-                                            </Form.Item>
+                                        <div>
+                                            <Button onClick={() => form.submit()}
+                                                style={{ width: "100%" }} type='primary'>Áp dụng</Button>
+                                        </div>
+                                    </Form.Item>
+                                    <Divider />
+                                    <Form.Item
+                                        label="Đánh giá"
+                                        labelCol={{ span: 24 }}
+                                    >
+                                        <div>
+                                            <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text"></span>
+                                        </div>
+                                        <div>
+                                            <Rate value={4} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text"> trở lên</span>
+                                        </div>
+                                        <div>
+                                            <Rate value={3} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text"> trở lên</span>
+                                        </div>
+                                        <div>
+                                            <Rate value={2} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text"> trở lên</span>
+                                        </div>
+                                        <div>
+                                            <Rate value={1} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
+                                            <span className="ant-rate-text"> trở lên</span>
+                                        </div>
+                                    </Form.Item>
+                                </Form>
+                            </div>
+                        </Col>
+                        <Col md={20} xs={24} >
+                            <Spin spinning={loadingBook} tip={"Đang tải..."}>
+
+                                <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
+                                    <Row>
+                                        <Tabs
+                                            defaultActiveKey="1"
+                                            items={items}
+                                            onChange={(value) => setSortQuery(value)}
+                                            style={{ overflowX: "auto" }}
+                                        />
+                                        <Col xs={24} md={0}>
+                                            <div style={{ marginBottom: 20 }} >
+                                                <span onClick={() => setShowMobileFilter(true)}>
+                                                    <FilterTwoTone />
+                                                    <span style={{ fontWeight: 500 }}> Lọc</span>
+                                                </span>
+                                            </div>
                                         </Col>
                                     </Row>
-                                    <div>
-                                        <Button onClick={() => form.submit()}
-                                            style={{ width: "100%" }} type='primary'>Áp dụng</Button>
-                                    </div>
-                                </Form.Item>
-                                <Divider />
-                                <Form.Item
-                                    label="Đánh giá"
-                                    labelCol={{ span: 24 }}
-                                >
-                                    <div>
-                                        <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                        <span className="ant-rate-text"></span>
-                                    </div>
-                                    <div>
-                                        <Rate value={4} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                        <span className="ant-rate-text"> trở lên</span>
-                                    </div>
-                                    <div>
-                                        <Rate value={3} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                        <span className="ant-rate-text"> trở lên</span>
-                                    </div>
-                                    <div>
-                                        <Rate value={2} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                        <span className="ant-rate-text"> trở lên</span>
-                                    </div>
-                                    <div>
-                                        <Rate value={1} disabled style={{ color: '#ffce3d', fontSize: 15 }} />
-                                        <span className="ant-rate-text"> trở lên</span>
-                                    </div>
-                                </Form.Item>
-                            </Form>
-                        </div>
-                    </Col>
-                    <Col md={20} xs={24} >
-                        <Spin spinning={loadingBook} tip={"Đang tải..."}>
-
-                            <div style={{ padding: "20px", background: '#fff', borderRadius: 5 }}>
-                                <Row>
-                                    <Tabs
-                                        defaultActiveKey="1"
-                                        items={items}
-                                        onChange={(value) => setSortQuery(value)}
-                                        style={{ overflowX: "auto" }}
-                                    />
-                                </Row>
-                                <Row className="customize-row">
-                                    {listBooks.map((item, index) => {
-                                        return (
-                                            <div className="column" key={index} onClick={() => navigate(`book/${item._id}`)}>
-                                                <div className='wrapper'>
-                                                    <div className='thumbnail'>
-                                                        <img src={`${import.meta.env.VITE_BACKEND_URL}/images/book/${item.thumbnail}`} alt="thumbnail book" />
-                                                    </div>
-                                                    <div className='text'>{item.mainText}</div>
-                                                    <div className='price'>
-                                                        {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
-                                                    </div>
-                                                    <div className='rating'>
-                                                        <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
-                                                        <span>Đã bán {item.sold ?? 0}</span>
+                                    <Row className="customize-row">
+                                        {listBooks.map((item, index) => {
+                                            return (
+                                                <div className="column" key={index} onClick={() => navigate(`book/${item._id}`)}>
+                                                    <div className='wrapper'>
+                                                        <div className='thumbnail'>
+                                                            <img src={`${import.meta.env.VITE_BACKEND_URL}/images/book/${item.thumbnail}`} alt="thumbnail book" />
+                                                        </div>
+                                                        <div className='text'>{item.mainText}</div>
+                                                        <div className='price'>
+                                                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.price)}
+                                                        </div>
+                                                        <div className='rating'>
+                                                            <Rate value={5} disabled style={{ color: '#ffce3d', fontSize: 10 }} />
+                                                            <span>Đã bán {item.sold ?? 0}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                        )
-                                    })}
+                                            )
+                                        })}
 
 
-                                </Row>
-                                <Divider />
-                                <Row style={{ display: "flex", justifyContent: "center" }}>
-                                    <Pagination
-                                        current={current}
-                                        pageSize={pageSize}
-                                        total={total}
-                                        responsive
-                                        onChange={(p, s) => { handleOnChangePage({ current: p, pageSize: s }) }}
-                                    />
-                                </Row>
-                            </div>
-                        </Spin>
-                    </Col>
-                </Row>
-            </div >
-        </div>
+                                    </Row>
+                                    <Divider />
+                                    <Row style={{ display: "flex", justifyContent: "center" }}>
+                                        <Pagination
+                                            current={current}
+                                            pageSize={pageSize}
+                                            total={total}
+                                            responsive
+                                            onChange={(p, s) => { handleOnChangePage({ current: p, pageSize: s }) }}
+                                        />
+                                    </Row>
+                                </div>
+                            </Spin>
+                        </Col>
+                    </Row>
+                </div >
+            </div>
+            <MobileFilter
+                isOpen={showMobileFilter}
+                setIsOpen={setShowMobileFilter}
+                handleChangeFilter={handleChangeFilter}
+                listCategory={dataCategory}
+                onFinish={onFinish}
+            />
+        </>
     )
 }
 
