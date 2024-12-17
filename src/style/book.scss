@@ -1,0 +1,206 @@
+@import "react-image-gallery/styles/scss/image-gallery.scss";
+
+.view-detail-book {
+
+    .original-image,
+    .thumbnail-image {
+        cursor: pointer;
+    }
+
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+    .author,
+    .title,
+    .rating,
+    .price,
+    .delivery,
+    .quantity {
+        margin-bottom: 1.2rem; // Tạo khoảng cách dọc giữa các thành phần
+    }
+
+    .author {
+        font-size: 1rem;
+        color: #555;
+
+        a {
+            color: #3498db;
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .title {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .rating {
+        display: flex;
+        align-items: center;
+
+        .ant-rate {
+            margin-right: 10px;
+        }
+
+        .sold {
+            color: #888;
+            font-size: 0.9rem;
+        }
+    }
+
+    .price {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #e74c3c;
+    }
+
+    .delivery {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .left {
+            color: #555;
+            font-weight: 500;
+            margin-right: 10px; // Tạo khoảng cách bên phải
+        }
+
+        .right {
+            color: #27ae60;
+            font-weight: bold;
+        }
+    }
+
+
+    .quantity {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .left {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            button {
+                background: #f3f3f3;
+                border: 1px solid #ddd;
+                padding: 6px 10px;
+                cursor: pointer;
+                border-radius: 4px;
+
+                &:hover {
+                    background: #e2e2e2;
+                }
+            }
+
+            input {
+                width: 50px;
+                text-align: center;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 6px;
+            }
+        }
+    }
+
+    .buy {
+        display: flex;
+        gap: 15px; // Khoảng cách ngang giữa 2 nút
+
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &.cart {
+                background: #f39c12;
+                color: #fff;
+
+                &:hover {
+                    background: darken(#f39c12, 10%);
+                }
+            }
+
+            &.now {
+                background: #e74c3c;
+                color: #fff;
+
+                &:hover {
+                    background: darken(#e74c3c, 10%);
+                }
+            }
+        }
+    }
+
+    // Ảnh thumbnail dưới ảnh chính
+    .thumbnails {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+
+        img {
+            width: 70px;
+            height: 70px;
+            border-radius: 5px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.1);
+            }
+        }
+    }
+
+    // Responsive cho màn hình nhỏ hơn 768px
+    @media screen and (max-width: 768px) {
+        .title {
+            font-size: 1.5rem;
+        }
+
+        .price {
+            font-size: 1.4rem;
+        }
+
+        .buy {
+            flex-direction: column;
+
+            button {
+                font-size: 0.9rem;
+            }
+        }
+    }
+}
+
+.modal-gallery {
+    // .active {
+    //     border: 2px solid #ee4d2d;
+    //     position: absolute;
+    //     width: 100px;
+    //     height: 100px;
+    //     box-sizing: border-box;
+    //     top: 0;
+    // }
+
+    .img-normal {
+        cursor: pointer;
+    }
+}

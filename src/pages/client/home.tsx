@@ -5,6 +5,7 @@ import { TabsProps } from "antd/lib";
 import { useEffect, useState } from "react";
 import { FormProps } from "antd";
 import 'style/home.scss'
+import { useNavigate } from "react-router-dom";
 
 type FieldType = {
     category: string[];
@@ -29,6 +30,8 @@ const HomePage = () => {
     const [dataCategory, setDataCategory] = useState<{
         label: string, value: string
     }[]>([]);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCategory = async () => {
@@ -236,7 +239,7 @@ const HomePage = () => {
                                 <Row className="customize-row">
                                     {listBooks.map((item, index) => {
                                         return (
-                                            <div className="column" key={index}>
+                                            <div className="column" key={index} onClick={() => navigate(`book/${item._id}`)}>
                                                 <div className='wrapper'>
                                                     <div className='thumbnail'>
                                                         <img src={`${import.meta.env.VITE_BACKEND_URL}/images/book/${item.thumbnail}`} alt="thumbnail book" />
