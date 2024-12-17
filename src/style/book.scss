@@ -204,3 +204,28 @@
         cursor: pointer;
     }
 }
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px; // Khoảng cách giữa icon và chữ
+    cursor: pointer;
+    color: #555; // Màu chữ mặc định
+    font-weight: 500;
+    font-size: 1rem; // Kích thước chữ
+    margin-bottom: 20px; // Khoảng cách với nội dung phía dưới
+    transition: all 0.3s ease;
+
+    &:hover {
+        color: #e67e22; // Màu chữ khi hover
+        transform: translateX(-3px); // Di chuyển nhẹ sang trái
+    }
+
+    svg {
+        font-size: 1.2rem; // Kích thước icon
+    }
+
+    span {
+        font-size: 1rem; // Kích thước chữ "Quay lại"
+    }
+}

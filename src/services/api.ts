@@ -83,3 +83,11 @@ export const deleteBookAPI = (id: string) => {
     const urlBackend = `/api/v1/book/${id}`;
     return axios.delete<IBackendRes<IRegister>>(urlBackend)
 }
+export const getBookDetailAPI = (id: string) => {
+    const urlBackend = `/api/v1/book/${id}`;
+    return axios.get<IBackendRes<IBookTable>>(urlBackend, {
+        headers: {
+            delay: 3000
+        }
+    })
+}
